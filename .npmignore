@@ -1,0 +1,26 @@
+# Artifacts
+*.log
+*.tgz
+
+# Development
+src/
+tsconfig.json
+.vscode/
+.idea/
+
+# Testing
+test/
+*.test.js
+*.test.ts
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore

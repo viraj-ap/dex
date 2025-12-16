@@ -1,0 +1,61 @@
+{
+  "name": "create-express-dex",
+  "version": "0.1.0",
+  "description": "A fast CLI to scaffold Express.js backend projects with TypeScript or JavaScript",
+  "main": "bin/index.js",
+  "type": "module",
+  "bin": {
+    "create-express-dex": "./bin/index.js"
+  },
+  "files": [
+    "bin",
+    "templates"
+  ],
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cli",
+    "express",
+    "generator",
+    "starter",
+    "scaffold",
+    "backend",
+    "nodejs",
+    "typescript",
+    "javascript",
+    "mongodb",
+    "mongoose",
+    "create",
+    "boilerplate",
+    "template"
+  ],
+  "author": "Viraj",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viraj-ap/dex.git"
+  },
+  "bugs": {
+    "url": "https://github.com/viraj-ap/dex/issues"
+  },
+  "homepage": "https://github.com/viraj-ap/dex",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.2.12"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
