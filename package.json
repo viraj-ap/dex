@@ -42,7 +42,7 @@
   "bugs": {
     "url": "https://github.com/viraj-ap/dex/issues"
   },
-  "homepage": "https://github.com/viraj-ap/dex",
+  "homepage": "https://dex-omega-fawn.vercel.app/",
   "dependencies": {
     "chalk": "^5.3.0",
     "fs-extra": "^11.2.0",
