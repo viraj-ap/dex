@@ -69,7 +69,12 @@ async function init() {
 
   // Copy template
   try {
-    await fs.copy(templateDir, targetDir);
+    await fs.copy(templateDir, targetDir, {
+      filter: (src: string) => {
+        // Exclude .gitkeep files
+        return !src.endsWith('.gitkeep');
+      }
+    });
 
     if (await fs.pathExists(path.join(targetDir, "_gitignore"))) {
       await fs.move(
