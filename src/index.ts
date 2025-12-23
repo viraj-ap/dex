@@ -69,12 +69,22 @@ async function init() {
 
   // Copy template
   try {
-    await fs.copy(templateDir, targetDir, {
-      filter: (src: string) => {
-        // Exclude .gitkeep files
-        return !src.endsWith('.gitkeep');
+    // Copy all files including .gitkeep to ensure directories are created
+    await fs.copy(templateDir, targetDir);
+
+    // Remove .gitkeep files after copying
+    const removeGitkeep = async (dir: string) => {
+      const files = await fs.readdir(dir, { withFileTypes: true });
+      for (const file of files) {
+        const fullPath = path.join(dir, file.name);
+        if (file.isDirectory()) {
+          await removeGitkeep(fullPath);
+        } else if (file.name === '.gitkeep') {
+          await fs.remove(fullPath);
+        }
       }
-    });
+    };
+    await removeGitkeep(targetDir);
 
     if (await fs.pathExists(path.join(targetDir, "_gitignore"))) {
       await fs.move(
@@ -100,7 +110,7 @@ async function init() {
 const connectDB = async () => {
     try {
         const connectionInstance = await mongoose.connect(\`\${process.env.MONGODB_URI}\`);
-        console.log(\`MongoDB connected successfully!\`);
+        console.log(\`✅ MongoDB connected successfully!\`);
     } catch (error) {
         console.log("MONGODB connection FAILED ", error);
         process.exit(1);
@@ -113,7 +123,7 @@ export default connectDB;`
 const connectDB = async () => {
     try {
         const connectionInstance = await mongoose.connect(\`\${process.env.MONGODB_URI}\`);
-        console.log(\`MongoDB connected successfully!\`);
+        console.log(\`✅ MongoDB connected successfully!\`);
     } catch (error) {
         console.log("MONGODB connection FAILED ", error);
         process.exit(1);
@@ -124,72 +134,30 @@ export default connectDB;`;
 
     await fs.outputFile(dbPath, dbCode);
 
+    // Modify the existing server file instead of overwriting it
     const serverFile = path.join(targetDir, "src", `server.${dbFileExt}`);
-    const serverCode =
-      language === "TypeScript"
-        ? `import express, { Express } from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import connectDB from "./db/index.js";
-
-dotenv.config({
-    path: './.env'
-});
-
-const app: Express = express();
-
-app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true
-}));
-
-app.use(express.json({limit: "16kb"}));
-app.use(express.urlencoded({extended: true, limit: "16kb"}));
-
-// routes declaration
-
-connectDB()
-.then(() => {
-    app.listen(process.env.PORT || 5000, () => {
-        console.log(\`Server running on port \${process.env.PORT || 5000}\`);
-    })
-})
-.catch((err) => {
-    console.log("MONGO db connection failed! ", err);
-});`
-        : `import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import connectDB from "./db/index.js";
-
-dotenv.config({
-    path: './.env'
-});
-
-const app = express();
-
-app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true
-}));
-
-app.use(express.json({limit: "16kb"}));
-app.use(express.urlencoded({extended: true, limit: "16kb"}));
-
-// routes declaration
-
-
-connectDB()
-.then(() => {
-    app.listen(process.env.PORT || 5000, () => {
-        console.log(\`Server running on port \${process.env.PORT || 5000}\`);
-    })
-})
-.catch((err) => {
-    console.log("MONGO db connection failed !!! ", err);
-});`;
-
-    await fs.outputFile(serverFile, serverCode);
+    let serverContent = await fs.readFile(serverFile, 'utf-8');
+    
+    // Add the connectDB import
+    serverContent = serverContent.replace(
+      'import dotenv from "dotenv";',
+      'import dotenv from "dotenv";\nimport connectDB from "./db/index.js";'
+    );
+    
+    // Replace the app.listen with connectDB pattern
+    if (language === "TypeScript") {
+      serverContent = serverContent.replace(
+        /app\.listen\(process\.env\.PORT \|\| 5000,.*?\{[\s\S]*?console\.log\([^)]*\);[\s\S]*?\}\);/,
+        `connectDB()\n.then(() => {\n    app.listen(process.env.PORT || 5000, () => {\n        console.log(\`⚙️ Server is running at port : \${process.env.PORT || 5000}\`);\n    })\n})\n.catch((err) => {\n    console.log("MONGO db connection failed! ", err);\n});`
+      );
+    } else {
+      serverContent = serverContent.replace(
+        /app\.listen\(process\.env\.PORT \|\| 5000,.*?\{[\s\S]*?console\.log\([^)]*\);[\s\S]*?\}\);/,
+        `connectDB()\n.then(() => {\n    app.listen(process.env.PORT || 5000, () => {\n        console.log(\`⚙️ Server is running at port : \${process.env.PORT || 5000}\`);\n    })\n})\n.catch((err) => {\n    console.log("MONGO db connection failed! ", err);\n});`
+      );
+    }
+    
+    await fs.writeFile(serverFile, serverContent);
   }
 
   const pkgJsonPath = path.join(targetDir, "package.json");

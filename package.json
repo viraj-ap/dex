@@ -1,6 +1,6 @@
 {
   "name": "create-express-dex",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "A fast CLI to scaffold Express.js backend projects with TypeScript or JavaScript",
   "main": "bin/index.js",
   "type": "module",
